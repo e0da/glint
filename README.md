@@ -65,6 +65,10 @@ $(glint)
 That command already runs locally from the crate in this repo. The remaining
 work is narrowing the output toward the compatibility contract.
 
+Direct command substitution is the current portable fallback. A higher
+performance shell integration will likely use hook-driven invalidation so
+`glint` does not need to recompute on every prompt render.
+
 ---
 
 ## Compatibility
@@ -79,6 +83,7 @@ The compatibility contract is defined in [docs/spec/git-super-status.md](docs/sp
 ## Docs
 
 - [docs/doctrine.md](docs/doctrine.md)
+- [docs/architecture.md](docs/architecture.md)
 - [docs/spec/git-super-status.md](docs/spec/git-super-status.md)
 - [CHANGELOG.md](CHANGELOG.md)
 

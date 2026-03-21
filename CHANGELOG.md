@@ -5,6 +5,7 @@ All notable changes to `glint` will be documented in this file.
 ## [Unreleased]
 
 - Project foundation and documentation for the first alpha release.
+- Document performance architecture and prompt integration strategy.
 
 ## [0.1.0-alpha.1] - 2026-03-21
 
