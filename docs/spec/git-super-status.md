@@ -4,6 +4,10 @@
 
 This document defines the first alpha compatibility target for `glint`.
 
+The executable fixture surface for that target lives under `compat/fixtures/`.
+Those fixtures are the machine-readable contract used by the compatibility
+verifier.
+
 ## Output Shape
 
 `glint` should emit a single prompt segment shaped like:
@@ -54,3 +58,9 @@ This document defines the first alpha compatibility target for `glint`.
 - Persistent config files
 - Advanced formatting flags
 - Full parity for rare upstream edge cases
+
+## Fixture Workflow
+
+- Use generated upstream fixtures to propose contract updates.
+- Review generated diffs before adopting them as `glint` behavior.
+- Keep normal CI on fixture verification, not on containerized upstream capture.
