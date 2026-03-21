@@ -1,0 +1,12 @@
+[package]
+name = "glint"
+version = "0.1.0-alpha.1"
+edition = "2024"
+license = "MIT"
+description = "Fast, minimal Git-aware prompt status as a single binary."
+
+[dependencies]
+
+[dev-dependencies]
+assert_cmd = "2.0.17"
+tempfile = "3.23.0"
