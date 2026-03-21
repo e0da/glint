@@ -2,49 +2,57 @@
 
 Fast, minimal Git-aware prompt status as a single binary.
 
-A drop-in replacement for `zsh-git-prompt`—without the runtime baggage.
+`glint` is the planned Rust replacement for `zsh-git-prompt`'s
+`git_super_status` prompt segment.
+
+Current state: this repository is in the foundation stage. The binary, crate,
+and release artifacts are not in place yet.
 
 ---
 
 ## Why
 
-`zsh-git-prompt` is great, but it often pulls in extra dependencies (e.g. Haskell/GHC builds or shell-heavy logic).
+`zsh-git-prompt` is useful, but it brings shell-heavy logic and extra runtime
+surface area.
 
-glint takes the same idea and compiles it into a small, fast binary:
+`glint` is intended to keep the same common-path behavior in a small Rust
+binary:
 
-- no runtime dependencies
-- no shell gymnastics
-- just one executable
+- no prompt scripting dependency
+- one executable
+- releaseable through GitHub Releases
+
+The first shipped version target is `0.1.0-alpha.1`.
 
 ---
 
-## Features
+## Scope
 
-- Git status for your shell prompt
-- Designed to be a drop-in replacement
-- Fast execution (built in Rust)
-- Single static binary distribution
-- Minimal configuration
+- Git prompt status for the common path
+- Compatibility with `zsh-git-prompt`'s `git_super_status`
+- Trunk-based development with Graphite stacks
+- Executable specs and golden tests for user-visible output
 
 ---
 
 ## Install
 
-### From source
+There is no installable binary yet.
+
+When the Rust crate lands, the local source install path will be:
 
 ```bash
 cargo install --path .
 ```
 
-### From release (planned)
-
-Download a prebuilt binary from GitHub Releases.
+Planned release artifacts will be published from GitHub Releases once the first
+alpha is tagged.
 
 ---
 
 ## Usage
 
-Replace your existing prompt call:
+Planned shell integration will replace:
 
 ```zsh
 $(git_super_status)
@@ -56,25 +64,24 @@ with:
 $(glint)
 ```
 
-That’s it.
+That is the target usage, not the current state of the repository.
 
 ---
 
 ## Compatibility
 
-glint aims to be compatible with the output and behavior of
-`zsh-git-prompt`’s `git_super_status`.
+The first alpha is targeting common-path compatibility with
+`zsh-git-prompt`'s `git_super_status`.
 
-Not all features are guaranteed initially—focus is on the common path first.
+The compatibility contract is defined in [docs/spec/git-super-status.md](docs/spec/git-super-status.md).
 
 ---
 
-## Design Goals
+## Docs
 
-- Be fast enough to run on every prompt render
-- Avoid external dependencies
-- Keep the implementation simple and auditable
-- Match existing workflows instead of inventing new ones
+- [docs/doctrine.md](docs/doctrine.md)
+- [docs/spec/git-super-status.md](docs/spec/git-super-status.md)
+- [CHANGELOG.md](CHANGELOG.md)
 
 ---
 
@@ -82,17 +89,14 @@ Not all features are guaranteed initially—focus is on the common path first.
 
 - Becoming a full prompt framework
 - Replacing tools like Starship or Powerlevel10k
-- Over-configurability
+- Exposing a large configuration surface in the first alpha
 
 ---
 
 ## Inspiration
 
-Inspired by:
-
-- https://github.com/olivierverdier/zsh-git-prompt
-
-Reimplemented in Rust as a standalone binary.
+Inspired by [zsh-git-prompt](https://github.com/olivierverdier/zsh-git-prompt).
+The implementation target is Rust.
 
 ---
 
