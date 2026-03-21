@@ -5,6 +5,7 @@
 - Use trunk-based development.
 - `main` is trunk.
 - Use Graphite (`gt`) for stacked branches and PRs.
+- Install repo hooks with `./scripts/install-hooks.sh`.
 - Keep each branch focused on one reviewable concern.
 - Prefer `gt c -am "message"` after making changes.
 - Use `gt m -a` for follow-up edits on the current branch.
@@ -14,6 +15,7 @@
 ## Solo Maintainer Policy
 
 - The repo currently relies on workflow discipline rather than branch protection.
+- Keep `./scripts/check.sh` green before submitting or merging a branch.
 - Merge only after the PR is green locally and in GitHub Actions.
 - Use Graphite stacks to keep changes small and auditable even without required approvals.
 - Use the `approved[e0da]` label as the merge gate for label-based automerge.

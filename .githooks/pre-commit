@@ -1,0 +1,19 @@
+#!/bin/sh
+set -eu
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+if ! command -v cargo >/dev/null 2>&1; then
+  echo "pre-commit: cargo is required to format Rust sources" >&2
+  exit 1
+fi
+
+if ! git diff --cached --name-only --diff-filter=ACMR | grep -Eq '(^|/)(Cargo\.toml|Cargo\.lock|.*\.rs)$'; then
+  exit 0
+fi
+
+echo "pre-commit: running cargo fmt --all"
+cargo fmt --all
+
+git add Cargo.toml Cargo.lock '*.rs' 2>/dev/null || true
