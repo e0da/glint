@@ -16,6 +16,9 @@
 - The repo currently relies on workflow discipline rather than branch protection.
 - Merge only after the PR is green locally and in GitHub Actions.
 - Use Graphite stacks to keep changes small and auditable even without required approvals.
+- Use the `approved[e0da]` label as the merge gate for label-based automerge.
+- Use `do-not-merge` to block automerge without rewriting the branch.
+- Automerge only applies once a PR targets `main`; stacked child PRs wait until restack promotes them to trunk.
 - Treat tags as immutable release identifiers.
 - Never move or reuse a published version tag. Cut a new version instead.
 
