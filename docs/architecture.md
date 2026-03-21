@@ -23,6 +23,35 @@ hash respects Git's configured abbreviation length.
 This keeps the implementation simple and already improves substantially on the
 original upstream Python path, which shells out multiple times per refresh.
 
+## Compatibility Capture Path
+
+The upstream compatibility-capture harness remains a separate, containerized
+Python workflow in `compat/`.
+
+That is an intentional choice for now.
+
+The 2026-03-21 investigation found that this path is dominated by external
+`git` and `zsh` subprocess orchestration rather than host-language runtime
+cost. The current generator is also stdlib-only and mostly expresses fixture
+cases, not complex Python-specific logic.
+
+In practice, this means:
+
+- keep the expensive upstream-capture path isolated from the Rust runtime path
+- do not treat a Python-to-TypeScript rewrite as a performance lever
+- revisit the language only if maintainability or workflow costs become real
+  enough to justify the rewrite
+- if TypeScript is ever reconsidered for this path, evaluate it as a workflow
+  choice first
+
+The harness also stays on an Ubuntu base image for now.
+
+The 2026-03-21 container-base investigation found that Alpine changed the
+generated fixture corpus, while Ubuntu and Debian slim matched each other.
+That makes image size a secondary concern here: the compatibility harness
+should prefer distro behavior that stays boring and stable over the smallest
+possible container footprint.
+
 ## Measured Direction
 
 The direct-invocation benchmarks from 2026-03-21 point to three conclusions:
