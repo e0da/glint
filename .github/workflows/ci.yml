@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: fmt, clippy, test, build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect Rust workspace
+        id: project
+        run: |
+          if [ -f Cargo.toml ]; then
+            echo "has_cargo=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_cargo=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Bootstrap check
+        if: steps.project.outputs.has_cargo != 'true'
+        run: echo "No Cargo.toml yet; skipping Rust checks on the bootstrap branch."
+
+      - name: Cache cargo registry
+        if: steps.project.outputs.has_cargo == 'true'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            cargo-${{ runner.os }}-
+
+      - name: Install Rust toolchain
+        if: steps.project.outputs.has_cargo == 'true'
+        run: |
+          rustup toolchain install stable --profile minimal --component rustfmt --component clippy
+          rustup default stable
+
+      - name: Format check
+        if: steps.project.outputs.has_cargo == 'true'
+        run: cargo fmt --all --check
+
+      - name: Clippy
+        if: steps.project.outputs.has_cargo == 'true'
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Test
+        if: steps.project.outputs.has_cargo == 'true'
+        run: cargo test --all-targets
+
+      - name: Build release binary
+        if: steps.project.outputs.has_cargo == 'true'
+        run: cargo build --release
