@@ -1,0 +1,138 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.runs-on }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-musl
+            runs-on: ubuntu-latest
+            linker: musl-gcc
+          - target: aarch64-unknown-linux-musl
+            runs-on: ubuntu-24.04-arm
+            linker: musl-gcc
+          - target: x86_64-apple-darwin
+            runs-on: macos-13
+          - target: aarch64-apple-darwin
+            runs-on: macos-14
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup target add "${{ matrix.target }}" --toolchain stable
+
+      - name: Install musl tools
+        if: contains(matrix.target, 'musl')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y musl-tools
+
+      - name: Configure musl linker
+        if: contains(matrix.target, 'musl')
+        run: |
+          mkdir -p "$HOME/.cargo"
+          cat >> "$HOME/.cargo/config.toml" <<EOF
+          [target.${{ matrix.target }}]
+          linker = "${{ matrix.linker }}"
+          EOF
+
+      - name: Build release binary
+        env:
+          RUSTUP_TOOLCHAIN: stable
+        run: cargo build --release --target "${{ matrix.target }}"
+
+      - name: Package archive
+        run: |
+          set -euo pipefail
+          archive_name="glint-${{ matrix.target }}"
+          staging_dir="$RUNNER_TEMP/$archive_name"
+          mkdir -p "$staging_dir"
+          cp "target/${{ matrix.target }}/release/glint" "$staging_dir/"
+          cp LICENSE "$staging_dir/"
+          printf 'tag=%s\ncommit=%s\ntarget=%s\n' "${GITHUB_REF_NAME}" "${GITHUB_SHA}" "${{ matrix.target }}" > "$staging_dir/RELEASE-METADATA.txt"
+          tar -czf "$archive_name.tar.gz" -C "$RUNNER_TEMP" "$archive_name"
+          if command -v sha256sum >/dev/null 2>&1; then
+            sha256sum "$archive_name.tar.gz" > "$archive_name.tar.gz.sha256"
+          else
+            shasum -a 256 "$archive_name.tar.gz" > "$archive_name.tar.gz.sha256"
+          fi
+
+      - name: Upload archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: glint-${{ matrix.target }}
+          path: |
+            glint-${{ matrix.target }}.tar.gz
+            glint-${{ matrix.target }}.tar.gz.sha256
+          if-no-files-found: error
+
+  publish:
+    name: Publish prerelease
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          pattern: glint-*
+          merge-multiple: true
+
+      - name: Enforce immutable release tags
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "release for ${TAG} already exists; version tags are immutable" >&2
+            exit 1
+          fi
+
+      - name: Publish GitHub prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+
+          assets=(dist/*.tar.gz dist/*.tar.gz.sha256)
+          if [ "${#assets[@]}" -eq 0 ]; then
+            echo "no release assets found" >&2
+            exit 1
+          fi
+
+          notes_file="$RUNNER_TEMP/release-notes.md"
+          cat > "$notes_file" <<EOF
+          glint ${TAG}
+
+          Prerelease artifacts for ${TAG}.
+          EOF
+
+          gh release create "$TAG" "${assets[@]}" \
+            --title "$TAG" \
+            --prerelease \
+            --notes-file "$notes_file"
