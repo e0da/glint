@@ -58,6 +58,7 @@ jobs:
         if: steps.target.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
           PR_NUMBER: ${{ steps.target.outputs.number }}
         run: |
           set -euo pipefail
@@ -78,7 +79,10 @@ jobs:
           pr_url="$(printf '%s' "${pr_json}" | jq -r '.url')"
 
           ci_green="$(printf '%s' "${checks_json}" | jq -r 'map(select(.workflow == "CI" and .name == "fmt, clippy, test, build" and .bucket == "pass")) | length > 0')"
-          checks_clear="$(printf '%s' "${checks_json}" | jq -r 'length > 0 and all(.[]; .bucket == "pass" or .bucket == "skipping")')"
+          checks_clear="$(printf '%s' "${checks_json}" | jq -r '
+            map(select(.workflow != "Auto Merge"))
+            | length > 0 and all(.[]; .bucket == "pass" or .bucket == "skipping")
+          ')"
 
           if [ "${state}" != "OPEN" ]; then
             echo "PR ${PR_NUMBER} is not open; skipping."
@@ -124,6 +128,7 @@ jobs:
         if: steps.gate.outputs.ready == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
           PR_NUMBER: ${{ steps.target.outputs.number }}
           HEAD_SHA: ${{ steps.gate.outputs.head_sha }}
         run: |
