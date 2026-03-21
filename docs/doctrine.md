@@ -5,12 +5,17 @@
 - Use trunk-based development.
 - `main` is trunk.
 - Use Graphite (`gt`) for stacked branches and PRs.
+- Track planned work in Linear under the `glint` project.
 - Install repo hooks with `./scripts/install-hooks.sh`.
+- Start each non-trivial branch from one Linear issue.
+- Prefer a branch name that includes the Linear issue ID.
 - Keep each branch focused on one reviewable concern.
 - Prefer `gt c -am "message"` after making changes.
 - Use `gt m -a` for follow-up edits on the current branch.
 - Use `gt restack` when stack relationships change.
 - Submit reviewable slices early with `gt ss`.
+- Include a Linear reference in every PR body with `Refs E0D-123`.
+- Use `Fixes E0D-123` only on the PR that should close the issue when it lands on `main`.
 
 ## Solo Maintainer Policy
 
@@ -18,6 +23,8 @@
 - Keep `./scripts/check.sh` green before submitting or merging a branch.
 - Merge only after the PR is green locally and in GitHub Actions.
 - Use Graphite stacks to keep changes small and auditable even without required approvals.
+- Let Graphite retarget stacked PRs after a merge; do not rely on GitHub Actions to delete merged stack branches immediately.
+- Keep stacked PRs linked to their own Linear issue instead of sharing one umbrella issue across the stack.
 - Use the `approved[e0da]` label as the merge gate for label-based automerge.
 - Use `do-not-merge` to block automerge without rewriting the branch.
 - Automerge only applies once a PR targets `main`; stacked child PRs wait until restack promotes them to trunk.
