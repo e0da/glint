@@ -48,6 +48,10 @@
 - Add fixtures for representative Git states before widening implementation.
 - Use unit tests for pure parsing and rendering logic.
 - Use integration tests for the CLI boundary.
+- Measure prompt latency in two layers: direct invocation cost and integrated
+  shell behavior.
+- Keep latency checks tied to an explicit invalidation strategy, not only raw
+  command runtime.
 
 ## Design Rules
 
@@ -55,3 +59,5 @@
 - Push filesystem, process, and Git I/O to the edges.
 - Keep docs short and honest about current state.
 - Add new docs only when they protect correctness, reviewability, or onboarding.
+- Treat command execution policy and invalidation strategy as product
+  architecture, not shell glue.
