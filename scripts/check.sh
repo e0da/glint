@@ -10,3 +10,4 @@ cargo fmt --all --check
 cargo clippy --all-targets --all-features -- -D warnings
 cargo test --all-targets
 cargo build --release
+./scripts/check-latency.sh

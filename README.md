@@ -85,6 +85,7 @@ The compatibility contract is defined in [docs/spec/git-super-status.md](docs/sp
 - [docs/doctrine.md](docs/doctrine.md)
 - [docs/architecture.md](docs/architecture.md)
 - [docs/spec/git-super-status.md](docs/spec/git-super-status.md)
+- [docs/spec/prompt-latency.md](docs/spec/prompt-latency.md)
 - [CHANGELOG.md](CHANGELOG.md)
 
 ---

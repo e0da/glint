@@ -66,6 +66,31 @@ The direct-invocation benchmarks from 2026-03-21 point to three conclusions:
 In other words, "more strategic" should mean "run less often" before it means
 "run different Git commands."
 
+## Repeatable Benchmark Harness
+
+The repo now carries a small latency harness so performance decisions can be
+rechecked against the same corpus instead of relying on one-off numbers.
+
+Use `./scripts/benchmark.sh` to regenerate the benchmark corpus in
+`tmp/benchmark-corpus/` and record fresh results in `tmp/benchmark-results/`.
+
+The corpus intentionally stays small:
+
+- `outside-git`: empty directory for the no-output path
+- `clean`: tracked branch with no local changes
+- `detached-clean`: detached HEAD on a clean commit
+- `dirty`: staged, changed, and untracked local work
+- `tracking-diverged`: local and remote history diverged after a fetch
+
+The harness reports two layers separately:
+
+- `direct`: invoke the built `glint` binary directly inside each corpus repo
+- `shell`: invoke `glint` through a fresh `zsh -f` command-substitution path
+
+That shell measurement is intentionally the current portable fallback, not the
+future hook-driven invalidation model. It exists so alpha-era numbers remain
+comparable until the first-class shell integration contract is settled.
+
 ## Performance Layers
 
 Treat prompt performance as two related but distinct layers.
