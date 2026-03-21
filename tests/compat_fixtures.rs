@@ -51,6 +51,8 @@ enum Operation {
     Git {
         repo: String,
         args: Vec<String>,
+        #[serde(default = "default_expect_success")]
+        expect_success: bool,
     },
     AddRemoteAndPush {
         repo: String,
@@ -93,11 +95,12 @@ impl FixtureContext {
         match operation {
             Operation::InitRepo { repo } => {
                 let dir = self.ensure_repo(&repo);
-                git(dir.path(), ["init", "-b", "main"]);
-                git(dir.path(), ["config", "user.name", "glint-tests"]);
+                git(dir.path(), ["init", "-b", "main"], true);
+                git(dir.path(), ["config", "user.name", "glint-tests"], true);
                 git(
                     dir.path(),
                     ["config", "user.email", "glint-tests@example.com"],
+                    true,
                 );
             }
             Operation::BareRemote { repo } => {
@@ -114,10 +117,11 @@ impl FixtureContext {
                     remote_path.to_str().unwrap(),
                     dir.path().to_str().unwrap(),
                 ]);
-                git(dir.path(), ["config", "user.name", "glint-tests"]);
+                git(dir.path(), ["config", "user.name", "glint-tests"], true);
                 git(
                     dir.path(),
                     ["config", "user.email", "glint-tests@example.com"],
+                    true,
                 );
             }
             Operation::CommitFile {
@@ -128,8 +132,8 @@ impl FixtureContext {
             } => {
                 let repo_path = self.repo(&repo).to_path_buf();
                 write_file(&repo_path, &path, &contents);
-                git(&repo_path, ["add", path.as_str()]);
-                git(&repo_path, ["commit", "-m", message.as_str()]);
+                git(&repo_path, ["add", path.as_str()], true);
+                git(&repo_path, ["commit", "-m", message.as_str()], true);
             }
             Operation::WriteFile {
                 repo,
@@ -139,9 +143,13 @@ impl FixtureContext {
                 let repo_path = self.repo(&repo).to_path_buf();
                 write_file(&repo_path, &path, &contents);
             }
-            Operation::Git { repo, args } => {
+            Operation::Git {
+                repo,
+                args,
+                expect_success,
+            } => {
                 let repo_path = self.repo(&repo).to_path_buf();
-                git(&repo_path, args.iter().map(String::as_str));
+                git(&repo_path, args.iter().map(String::as_str), expect_success);
             }
             Operation::AddRemoteAndPush { repo, remote } => {
                 let repo_path = self.repo(&repo).to_path_buf();
@@ -149,8 +157,9 @@ impl FixtureContext {
                 git(
                     &repo_path,
                     ["remote", "add", "origin", remote_path.to_str().unwrap()],
+                    true,
                 );
-                git(&repo_path, ["push", "-u", "origin", "main"]);
+                git(&repo_path, ["push", "-u", "origin", "main"], true);
             }
         }
     }
@@ -168,6 +177,10 @@ impl FixtureContext {
 
 fn default_repo() -> String {
     "repo".to_owned()
+}
+
+fn default_expect_success() -> bool {
+    true
 }
 
 fn fixture_files() -> Vec<PathBuf> {
@@ -233,14 +246,14 @@ fn write_file(repo: &Path, path: &str, contents: &str) {
     fs::write(full_path, contents).unwrap();
 }
 
-fn git(repo: &Path, args: impl IntoIterator<Item = impl AsRef<str>>) {
+fn git(repo: &Path, args: impl IntoIterator<Item = impl AsRef<str>>, expect_success: bool) {
     let status = Command::new("git")
         .current_dir(repo)
         .args(args.into_iter().map(|arg| arg.as_ref().to_owned()))
         .status()
         .expect("git command should run");
 
-    assert!(status.success());
+    assert_eq!(status.success(), expect_success);
 }
 
 fn git_raw(args: impl IntoIterator<Item = impl AsRef<str>>) {

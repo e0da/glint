@@ -259,6 +259,84 @@
       ]
     },
     {
+      "name": "conflicts_and_changed",
+      "expected_stdout": "(main|✖1✚1)",
+      "operations": [
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": ["checkout", "-b", "feature"]
+        },
+        {
+          "type": "write_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "feature"
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": ["add", "tracked.txt"]
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": ["commit", "-m", "Feature change"]
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": ["checkout", "main"]
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "other.txt",
+          "contents": "base",
+          "message": "Add second file"
+        },
+        {
+          "type": "write_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "main"
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": ["add", "tracked.txt"]
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": ["commit", "-m", "Main change"]
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": ["merge", "feature"],
+          "expect_success": false
+        },
+        {
+          "type": "write_file",
+          "repo": "repo",
+          "path": "other.txt",
+          "contents": "changed"
+        }
+      ]
+    },
+    {
       "name": "theme_overrides",
       "expected_stdout": "[BR:main :: OK]",
       "env": {
