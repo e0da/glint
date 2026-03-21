@@ -11,6 +11,18 @@ pub struct GitStatus {
     pub untracked: usize,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct ParsedStatus {
+    branch_name: String,
+    branch_oid: Option<String>,
+    ahead: usize,
+    behind: usize,
+    staged: usize,
+    conflicts: usize,
+    changed: usize,
+    untracked: usize,
+}
+
 pub fn collect_status() -> Option<GitStatus> {
     let output = Command::new("git")
         .args(["status", "--porcelain=v2", "--branch"])
@@ -21,10 +33,28 @@ pub fn collect_status() -> Option<GitStatus> {
         return None;
     }
 
-    parse_status(&String::from_utf8_lossy(&output.stdout))
+    let parsed = parse_status(&String::from_utf8_lossy(&output.stdout))?;
+    let branch = if parsed.branch_name == "(detached)" {
+        format!(
+            ":{}",
+            detached_head_oid().or(parsed.branch_oid.clone())?.trim()
+        )
+    } else {
+        parsed.branch_name
+    };
+
+    Some(GitStatus {
+        branch,
+        ahead: parsed.ahead,
+        behind: parsed.behind,
+        staged: parsed.staged,
+        conflicts: parsed.conflicts,
+        changed: parsed.changed,
+        untracked: parsed.untracked,
+    })
 }
 
-fn parse_status(output: &str) -> Option<GitStatus> {
+fn parse_status(output: &str) -> Option<ParsedStatus> {
     let mut branch_name = None;
     let mut branch_oid = None;
     let mut ahead = 0;
@@ -96,14 +126,9 @@ fn parse_status(output: &str) -> Option<GitStatus> {
         }
     }
 
-    let branch = match branch_name.as_deref() {
-        Some("(detached)") => format!(":{}", short_oid(branch_oid.as_deref())?),
-        Some(name) => name.to_owned(),
-        _ => return None,
-    };
-
-    Some(GitStatus {
-        branch,
+    Some(ParsedStatus {
+        branch_name: branch_name?,
+        branch_oid,
         ahead,
         behind,
         staged,
@@ -113,14 +138,17 @@ fn parse_status(output: &str) -> Option<GitStatus> {
     })
 }
 
-fn short_oid(oid: Option<&str>) -> Option<&str> {
-    let value = oid?;
+fn detached_head_oid() -> Option<String> {
+    let output = Command::new("git")
+        .args(["rev-parse", "--short", "HEAD"])
+        .output()
+        .ok()?;
 
-    if value == "(initial)" || value.len() < 7 {
+    if !output.status.success() {
         return None;
     }
 
-    value.get(..7)
+    Some(String::from_utf8_lossy(&output.stdout).trim().to_owned())
 }
 
 fn is_changed(value: &str) -> bool {
@@ -129,7 +157,7 @@ fn is_changed(value: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::{GitStatus, parse_status};
+    use super::{ParsedStatus, parse_status};
 
     #[test]
     fn parses_branch_and_counts() {
@@ -150,8 +178,9 @@ u UU N... 100644 100644 100644 100644 abcdef1 abcdef2 abcdef3 conflicted.rs
 
         assert_eq!(
             status,
-            GitStatus {
-                branch: "main".to_owned(),
+            ParsedStatus {
+                branch_name: "main".to_owned(),
+                branch_oid: Some("aabbccddeeff00112233445566778899aabbccdd".to_owned()),
                 ahead: 2,
                 behind: 1,
                 staged: 2,
@@ -172,7 +201,19 @@ u UU N... 100644 100644 100644 100644 abcdef1 abcdef2 abcdef3 conflicted.rs
         )
         .unwrap();
 
-        assert_eq!(status.branch, ":70c2952");
+        assert_eq!(
+            status,
+            ParsedStatus {
+                branch_name: "(detached)".to_owned(),
+                branch_oid: Some("70c2952abcdef012345678901234567890123456".to_owned()),
+                ahead: 0,
+                behind: 0,
+                staged: 0,
+                conflicts: 0,
+                changed: 0,
+                untracked: 0,
+            }
+        );
     }
 
     #[test]

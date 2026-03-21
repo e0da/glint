@@ -2,11 +2,12 @@
 
 Fast, minimal Git-aware prompt status as a single binary.
 
-`glint` is the planned Rust replacement for `zsh-git-prompt`'s
+`glint` is the Rust replacement for `zsh-git-prompt`'s
 `git_super_status` prompt segment.
 
-Current state: this repository is in the foundation stage. The binary, crate,
-and release artifacts are not in place yet.
+Current state: the foundation-stage crate and binary are in place. Local source
+installs work today; GitHub Release artifacts remain alpha-stage follow-up
+work.
 
 ---
 
@@ -37,22 +38,19 @@ The first shipped version target is `0.1.0-alpha.1`.
 
 ## Install
 
-There is no installable binary yet.
-
-When the Rust crate lands, the local source install path will be:
+Local source install is available now:
 
 ```bash
 cargo install --path .
 ```
 
-Planned release artifacts will be published from GitHub Releases once the first
-alpha is tagged.
+GitHub Release artifacts are planned once the first alpha is tagged.
 
 ---
 
 ## Usage
 
-Planned shell integration will replace:
+Shell integration target:
 
 ```zsh
 $(git_super_status)
@@ -64,7 +62,8 @@ with:
 $(glint)
 ```
 
-That is the target usage, not the current state of the repository.
+The contract and output coverage are still being tightened as the alpha stack
+lands, but the binary already emits the prompt segment shape described here.
 
 ---
 
