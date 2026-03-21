@@ -24,6 +24,7 @@
 - Merge only after the PR is green locally and in GitHub Actions.
 - Use Graphite stacks to keep changes small and auditable even without required approvals.
 - Let Graphite retarget stacked PRs after a merge; do not rely on GitHub Actions to delete merged stack branches immediately.
+- The label-gated automerge workflow may proactively retarget direct child PRs to the merged PR's base branch before merging so stack promotion stays safe even if the merged branch disappears immediately after. If any direct child PR still targets the soon-to-be-merged branch after that promotion step, the workflow must fail instead of merging.
 - Keep stacked PRs linked to their own Linear issue instead of sharing one umbrella issue across the stack.
 - Use the `approved[e0da]` label as the merge gate for label-based automerge.
 - Use `do-not-merge` to block automerge without rewriting the branch.

@@ -63,7 +63,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          pr_json="$(gh pr view "${PR_NUMBER}" --json baseRefName,headRefOid,isDraft,labels,state,url)"
+          pr_json="$(gh pr view "${PR_NUMBER}" --json baseRefName,headRefName,headRefOid,isDraft,labels,state,url)"
           checks_json="$(gh pr checks "${PR_NUMBER}" --json bucket,name,workflow 2>/dev/null || true)"
 
           if [ -z "${checks_json}" ]; then
@@ -73,6 +73,7 @@ jobs:
           has_approval_label="$(printf '%s' "${pr_json}" | jq -r '[.labels[].name] | index("approved[e0da]") != null')"
           has_block_label="$(printf '%s' "${pr_json}" | jq -r '[.labels[].name] | index("do-not-merge") != null')"
           base_ref="$(printf '%s' "${pr_json}" | jq -r '.baseRefName')"
+          head_ref_name="$(printf '%s' "${pr_json}" | jq -r '.headRefName')"
           is_draft="$(printf '%s' "${pr_json}" | jq -r '.isDraft')"
           state="$(printf '%s' "${pr_json}" | jq -r '.state')"
           head_sha="$(printf '%s' "${pr_json}" | jq -r '.headRefOid')"
@@ -121,8 +122,42 @@ jobs:
           fi
 
           echo "PR ${PR_NUMBER} is ready for merge: ${pr_url}"
+          echo "base_ref=${base_ref}" >> "${GITHUB_OUTPUT}"
+          echo "head_ref_name=${head_ref_name}" >> "${GITHUB_OUTPUT}"
           echo "head_sha=${head_sha}" >> "${GITHUB_OUTPUT}"
           echo "ready=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Promote direct child PRs
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          BASE_REF: ${{ steps.gate.outputs.base_ref }}
+          HEAD_REF_NAME: ${{ steps.gate.outputs.head_ref_name }}
+        run: |
+          set -euo pipefail
+
+          children_json="$(gh pr list --state open --base "${HEAD_REF_NAME}" --json number,url)"
+          child_count="$(printf '%s' "${children_json}" | jq 'length')"
+
+          if [ "${child_count}" -eq 0 ]; then
+            echo "No direct child PRs target ${HEAD_REF_NAME}."
+            exit 0
+          fi
+
+          printf '%s' "${children_json}" | jq -c '.[]' | while read -r child; do
+            child_number="$(printf '%s' "${child}" | jq -r '.number')"
+            child_url="$(printf '%s' "${child}" | jq -r '.url')"
+            echo "Retargeting child PR ${child_number} to ${BASE_REF}: ${child_url}"
+            gh pr edit "${child_number}" --base "${BASE_REF}"
+          done
+
+          remaining_children="$(gh pr list --state open --base "${HEAD_REF_NAME}" --json number | jq 'length')"
+
+          if [ "${remaining_children}" -ne 0 ]; then
+            echo "Refusing to merge while ${remaining_children} child PR(s) still target ${HEAD_REF_NAME}."
+            exit 1
+          fi
 
       - name: Merge PR
         if: steps.gate.outputs.ready == 'true'
@@ -133,4 +168,8 @@ jobs:
           HEAD_SHA: ${{ steps.gate.outputs.head_sha }}
         run: |
           set -euo pipefail
-          gh pr merge "${PR_NUMBER}" --rebase --match-head-commit "${HEAD_SHA}"
+          gh api \
+            --method PUT \
+            "repos/${GH_REPO}/pulls/${PR_NUMBER}/merge" \
+            -f merge_method=rebase \
+            -f sha="${HEAD_SHA}"
