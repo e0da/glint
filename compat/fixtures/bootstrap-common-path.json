@@ -1,0 +1,286 @@
+{
+  "metadata": {
+    "source": "bootstrap",
+    "note": "Seed fixtures for the compatibility harness. Replace or extend with generated upstream captures."
+  },
+  "cases": [
+    {
+      "name": "clean_branch",
+      "expected_stdout": "(main|✔)",
+      "operations": [
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        }
+      ]
+    },
+    {
+      "name": "staged_only",
+      "expected_stdout": "(main|●1)",
+      "operations": [
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        },
+        {
+          "type": "write_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "updated"
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": ["add", "tracked.txt"]
+        }
+      ]
+    },
+    {
+      "name": "changed_only",
+      "expected_stdout": "(main|✚1)",
+      "operations": [
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        },
+        {
+          "type": "write_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "updated"
+        }
+      ]
+    },
+    {
+      "name": "untracked",
+      "expected_stdout": "(main|…)",
+      "operations": [
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        },
+        {
+          "type": "write_file",
+          "repo": "repo",
+          "path": "new.txt",
+          "contents": "new"
+        }
+      ]
+    },
+    {
+      "name": "ahead_only",
+      "expected_stdout": "(main↑1|✔)",
+      "operations": [
+        {
+          "type": "bare_remote",
+          "repo": "origin"
+        },
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        },
+        {
+          "type": "add_remote_and_push",
+          "repo": "repo",
+          "remote": "origin"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "local",
+          "message": "Local commit"
+        }
+      ]
+    },
+    {
+      "name": "behind_only",
+      "expected_stdout": "(main↓1|✔)",
+      "operations": [
+        {
+          "type": "bare_remote",
+          "repo": "origin"
+        },
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        },
+        {
+          "type": "add_remote_and_push",
+          "repo": "repo",
+          "remote": "origin"
+        },
+        {
+          "type": "clone_remote",
+          "repo": "peer",
+          "remote": "origin"
+        },
+        {
+          "type": "commit_file",
+          "repo": "peer",
+          "path": "peer.txt",
+          "contents": "peer",
+          "message": "Peer commit"
+        },
+        {
+          "type": "git",
+          "repo": "peer",
+          "args": ["push", "origin", "main"]
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": ["fetch", "origin"]
+        }
+      ]
+    },
+    {
+      "name": "diverged",
+      "expected_stdout": "(main↓1↑1|✔)",
+      "operations": [
+        {
+          "type": "bare_remote",
+          "repo": "origin"
+        },
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        },
+        {
+          "type": "add_remote_and_push",
+          "repo": "repo",
+          "remote": "origin"
+        },
+        {
+          "type": "clone_remote",
+          "repo": "peer",
+          "remote": "origin"
+        },
+        {
+          "type": "commit_file",
+          "repo": "peer",
+          "path": "peer.txt",
+          "contents": "peer",
+          "message": "Peer commit"
+        },
+        {
+          "type": "git",
+          "repo": "peer",
+          "args": ["push", "origin", "main"]
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "local.txt",
+          "contents": "local",
+          "message": "Local commit"
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": ["fetch", "origin"]
+        }
+      ]
+    },
+    {
+      "name": "detached_head_abbrev",
+      "expected_stdout": "(:{{git_short_head:repo}}|✔)",
+      "operations": [
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": ["config", "core.abbrev", "12"]
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": ["checkout", "--detach"]
+        }
+      ]
+    },
+    {
+      "name": "theme_overrides",
+      "expected_stdout": "[BR:main :: OK]",
+      "env": {
+        "ZSH_THEME_GIT_PROMPT_PREFIX": "[",
+        "ZSH_THEME_GIT_PROMPT_SUFFIX": "]",
+        "ZSH_THEME_GIT_PROMPT_SEPARATOR": " :: ",
+        "ZSH_THEME_GIT_PROMPT_BRANCH": "BR:",
+        "ZSH_THEME_GIT_PROMPT_CLEAN": "OK"
+      },
+      "operations": [
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        }
+      ]
+    }
+  ]
+}

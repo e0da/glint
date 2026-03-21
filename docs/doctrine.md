@@ -42,6 +42,8 @@
 ## Testing Expectations
 
 - Treat prompt output as the contract.
+- Prefer capturing compatibility behavior as executable fixtures before widening
+  implementation.
 - Prefer executable specs and golden tests for user-visible behavior.
 - Add fixtures for representative Git states before widening implementation.
 - Use unit tests for pure parsing and rendering logic.
