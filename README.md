@@ -66,8 +66,9 @@ That command already runs locally from the crate in this repo. The remaining
 work is narrowing the output toward the compatibility contract.
 
 Direct command substitution is the current portable fallback. A higher
-performance shell integration will likely use hook-driven invalidation so
-`glint` does not need to recompute on every prompt render.
+performance shell integration is defined in
+[docs/spec/shell-integration.md](docs/spec/shell-integration.md), but that
+hook-driven path is not shipped yet.
 
 ---
 
@@ -86,6 +87,7 @@ The compatibility contract is defined in [docs/spec/git-super-status.md](docs/sp
 - [docs/architecture.md](docs/architecture.md)
 - [docs/spec/git-super-status.md](docs/spec/git-super-status.md)
 - [docs/spec/prompt-latency.md](docs/spec/prompt-latency.md)
+- [docs/spec/shell-integration.md](docs/spec/shell-integration.md)
 - [CHANGELOG.md](CHANGELOG.md)
 
 ---
