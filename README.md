@@ -5,8 +5,9 @@ Fast, minimal Git-aware prompt status as a single binary.
 `glint` is the Rust replacement for `zsh-git-prompt`'s
 `git_super_status` prompt segment.
 
-Current state: the crate and CLI are in place, source installs work, and the
-compatibility surface is still being built out for the first alpha.
+Current state: the crate and CLI are in place, direct source installs work, and
+the first alpha contract is still being finished. Tagged release artifacts and
+hook-driven shell integration are not shipped yet.
 
 ---
 
@@ -20,7 +21,7 @@ binary:
 
 - no prompt scripting dependency
 - one executable
-- releaseable through GitHub Releases
+- planned GitHub Release artifacts once the first alpha tag exists
 
 The first shipped version target is `0.1.0-alpha.1`.
 
@@ -29,9 +30,8 @@ The first shipped version target is `0.1.0-alpha.1`.
 ## Scope
 
 - Git prompt status for the common path
-- Compatibility with `zsh-git-prompt`'s `git_super_status`
-- Trunk-based development with Graphite stacks
-- Executable specs and golden tests for user-visible output
+- Common-path alpha compatibility with `zsh-git-prompt`'s `git_super_status`
+- Executable compatibility fixtures and integration tests for user-visible output
 
 ---
 
@@ -50,23 +50,16 @@ Releases once the first alpha is tagged.
 
 ## Usage
 
-The intended shell integration is:
-
-```zsh
-$(git_super_status)
-```
-
-with:
+Current portable usage is direct command substitution:
 
 ```zsh
 $(glint)
 ```
 
-That command already runs locally from the crate in this repo. The remaining
-work is narrowing the output toward the compatibility contract.
+That path works today from a source install. It is the current fallback path,
+not the long-term high-performance integration.
 
-Direct command substitution is the current portable fallback. A higher
-performance shell integration is defined in
+The planned higher-performance shell integration is defined in
 [docs/spec/shell-integration.md](docs/spec/shell-integration.md), but that
 hook-driven path is not shipped yet.
 
@@ -78,6 +71,8 @@ The first alpha is targeting common-path compatibility with
 `zsh-git-prompt`'s `git_super_status`.
 
 The compatibility contract is defined in [docs/spec/git-super-status.md](docs/spec/git-super-status.md).
+Current automated coverage is centered on that common-path contract rather than
+broader upstream parity.
 
 ---
 
