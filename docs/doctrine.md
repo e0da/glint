@@ -19,16 +19,20 @@
 
 ## Solo Maintainer Policy
 
-- The repo currently relies on workflow discipline rather than branch protection.
+- Protect `main` in GitHub with required checks instead of relying only on workflow discipline.
 - Keep `./scripts/check.sh` green before submitting or merging a branch.
-- Merge only after the PR is green locally and in GitHub Actions.
+- Merge only after the PR is green locally and GitHub shows every required check green.
 - Use Graphite stacks to keep changes small and auditable even without required approvals.
-- Let Graphite retarget stacked PRs after a merge; do not rely on GitHub Actions to delete merged stack branches immediately.
-- The label-gated automerge workflow may proactively retarget direct child PRs to the merged PR's base branch before merging so stack promotion stays safe even if the merged branch disappears immediately after. If any direct child PR still targets the soon-to-be-merged branch after that promotion step, the workflow must fail instead of merging.
+- Use `./scripts/protect-main.sh` to reapply the live `main` branch protection when the repo is recreated or settings drift.
 - Keep stacked PRs linked to their own Linear issue instead of sharing one umbrella issue across the stack.
-- Use the `approved[e0da]` label as the merge gate for label-based automerge.
-- Use `do-not-merge` to block automerge without rewriting the branch.
-- Automerge only applies once a PR targets `main`; stacked child PRs wait until restack promotes them to trunk.
+- Require `fmt, clippy, test, build` and `merge-readiness/e0da` on `main`.
+- The `merge-readiness/e0da` status stays pending on `main`-targeting PRs until at least one label matching `approved[...]` is present.
+- Use `approved[e0da]` as the current solo-maintainer approval label; the first rule intentionally accepts any single `approved[...]` label.
+- Use `do-not-merge` to push `merge-readiness/e0da` back to pending without rewriting the branch.
+- Stacked child PRs stay outside the readiness gate until Graphite promotion retargets them to `main`.
+- The default Graphite loop is: stack with `gt ss`, review bottom-up, then use Graphite `Merge when ready` on the lowest PR once it targets `main` and GitHub shows the required checks green.
+- Do not use `Merge when ready` on child PRs that still target another stack branch; let Graphite promote them to `main` first.
+- For the solo-maintainer flow, the buttery path is: push the branch, wait for CI, add `approved[e0da]` when you want it merge-eligible, then click `Merge when ready`.
 - Treat tags as immutable release identifiers.
 - Never move or reuse a published version tag. Cut a new version instead.
 
