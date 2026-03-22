@@ -49,9 +49,9 @@ The alpha budget applies to every corpus repo in the harness summary:
 The `shell` mode measures the current portable fallback: a fresh `zsh -f`
 invocation that renders prompt output through `$(glint)`.
 
-This is not the future hook-driven invalidation path. It is only the
-comparable alpha baseline until the first-class shell integration contract is
-defined.
+This is not the hook-driven path described in `docs/spec/shell-integration.md`.
+It is only the comparable alpha baseline until that first-class integration is
+implemented.
 
 ## Guardrails
 

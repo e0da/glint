@@ -7,6 +7,7 @@ All notable changes to `glint` will be documented in this file.
 - Project foundation and documentation for the first alpha release.
 - Document performance architecture and prompt integration strategy.
 - Add a repeatable benchmark corpus and latency harness for direct and shell fallback measurements.
+- Define the planned hook-driven shell integration and invalidation contract.
 
 ## [0.1.0-alpha.1] - 2026-03-21
 

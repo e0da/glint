@@ -119,16 +119,24 @@ It covers:
 - whether directory changes force recomputation
 - whether non-Git commands reuse the last known prompt state
 
-Upstream `zsh-git-prompt` already wins some real-world latency here through hook
-driven invalidation. A direct `$(glint)` substitution remains a useful fallback,
-but it is not the end-state for a best-in-class prompt component.
+The intended first-class contract is now defined in
+`docs/spec/shell-integration.md`.
+
+That contract makes three conservative alpha choices explicit:
+
+- the first-class shell surface is `zsh`
+- prompt state is invalidated after any real command or directory change
+- prompt redraws without an intervening command reuse the cached segment
+
+Direct `$(glint)` substitution remains a useful portable fallback, but it is
+not the end-state for a best-in-class prompt component.
 
 ## Strategic Direction
 
 The preferred order for performance work is:
 
 1. define a direct invocation budget and measurement method
-2. define a shell-integration invalidation strategy that avoids needless runs
+2. implement the settled shell-integration invalidation contract
 3. add regression checks for both layers
 4. only then explore a native Git backend if it can beat the porcelain path
    without compromising compatibility
@@ -141,5 +149,7 @@ Prefer these constraints while improving performance:
 - keep a simple direct CLI path even if richer shell integration lands later
 - do not replace one Git subprocess with many subprocesses in the hot path
 - do not add speculative caching without a clear invalidation model
+- do not guess that a command was read-only unless that rule becomes an explicit
+  part of the contract
 - do not claim best-in-class performance from microbenchmarks alone; measure
   both direct invocation and integrated shell behavior
