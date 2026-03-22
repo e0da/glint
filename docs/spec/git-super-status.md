@@ -25,6 +25,16 @@ verifier.
 - Show the clean indicator only when the repository is otherwise clean.
 - Produce no output outside a Git repository.
 
+## Prompt-Safe Failure Behavior
+
+For `0.1.0-alpha.1`, `glint` should fail closed.
+
+- If `glint` cannot derive a complete status segment, it should emit no output.
+- Treat Git subprocess launch failures and non-zero Git exits as no-output cases.
+- Treat malformed or incomplete porcelain output as a no-output case.
+- Keep these prompt-time failures silent rather than printing partial segments or
+  user-facing errors.
+
 ## Prompt Symbols
 
 - Branch marker: `ZSH_THEME_GIT_PROMPT_BRANCH`

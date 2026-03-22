@@ -1,4 +1,5 @@
 use std::fs;
+use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 use std::process::Command;
 
@@ -11,6 +12,55 @@ fn outside_git_repo_emits_nothing() {
     let repo = repo();
 
     assert_output(repo.path(), "");
+}
+
+#[test]
+fn git_command_failure_emits_nothing() {
+    let repo = repo();
+    let fake_git = fake_git(
+        "\
+#!/bin/sh
+exit 1
+",
+    );
+
+    let output = glint(repo.path())
+        .env("PATH", fake_git.path())
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let stdout = normalize_output(String::from_utf8(output).unwrap());
+
+    assert_eq!(stdout, "");
+}
+
+#[test]
+fn incomplete_status_output_emits_nothing() {
+    let repo = repo();
+    let fake_git = fake_git(
+        "\
+#!/bin/sh
+if [ \"$1\" = \"status\" ]; then
+  printf '%s\n' '# branch.oid deadbeef'
+  exit 0
+fi
+
+exit 1
+",
+    );
+
+    let output = glint(repo.path())
+        .env("PATH", fake_git.path())
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let stdout = normalize_output(String::from_utf8(output).unwrap());
+
+    assert_eq!(stdout, "");
 }
 
 #[test]
@@ -239,6 +289,18 @@ fn write_file(repo: &Path, path: &str, contents: &str) {
         fs::create_dir_all(parent).unwrap();
     }
     fs::write(full_path, contents).unwrap();
+}
+
+fn fake_git(script: &str) -> TempDir {
+    let dir = repo();
+    let path = dir.path().join("git");
+    fs::write(&path, script).unwrap();
+
+    let mut permissions = fs::metadata(&path).unwrap().permissions();
+    permissions.set_mode(0o755);
+    fs::set_permissions(&path, permissions).unwrap();
+
+    dir
 }
 
 fn git(repo: &Path, args: impl IntoIterator<Item = impl AsRef<str>>) {
