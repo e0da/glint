@@ -35,10 +35,7 @@ pub fn collect_status() -> Option<GitStatus> {
 
     let parsed = parse_status(&String::from_utf8_lossy(&output.stdout))?;
     let branch = if parsed.branch_name == "(detached)" {
-        format!(
-            ":{}",
-            detached_head_oid().or(parsed.branch_oid.clone())?.trim()
-        )
+        format!(":{}", detached_head_oid()?.trim())
     } else {
         parsed.branch_name
     };

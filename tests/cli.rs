@@ -64,6 +64,38 @@ exit 1
 }
 
 #[test]
+fn detached_head_without_short_hash_emits_nothing() {
+    let repo = repo();
+    let fake_git = fake_git(
+        "\
+#!/bin/sh
+if [ \"$1\" = \"status\" ]; then
+  printf '%s\n' '# branch.oid 70c2952abcdef012345678901234567890123456'
+  printf '%s\n' '# branch.head (detached)'
+  exit 0
+fi
+
+if [ \"$1\" = \"rev-parse\" ]; then
+  exit 1
+fi
+
+exit 1
+",
+    );
+
+    let output = glint(repo.path())
+        .env("PATH", fake_git.path())
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let stdout = normalize_output(String::from_utf8(output).unwrap());
+
+    assert_eq!(stdout, "");
+}
+
+#[test]
 fn clean_branch_renders_expected_output() {
     let repo = repo();
     init_repo(repo.path());
