@@ -3,11 +3,9 @@ name: Merge Readiness
 on:
   pull_request:
     types:
-      - converted_to_draft
       - edited
       - labeled
       - opened
-      - ready_for_review
       - reopened
       - synchronize
       - unlabeled
