@@ -4,11 +4,9 @@ on:
   pull_request:
     types:
       - edited
-      - labeled
       - opened
       - reopened
       - synchronize
-      - unlabeled
 
 concurrency:
   group: merge-readiness-${{ github.event.pull_request.number }}
