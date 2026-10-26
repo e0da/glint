@@ -6,10 +6,12 @@ use std::process::Command;
 use serde::Deserialize;
 use tempfile::TempDir;
 
-const RESET: &str = "%{${reset_color}%}";
+const RESET: &str = "%{\x1b[00m%}";
 
 #[derive(Debug, Deserialize)]
 struct FixtureFile {
+    #[serde(default)]
+    raw: bool,
     cases: Vec<FixtureCase>,
 }
 
@@ -72,7 +74,7 @@ fn fixture_contract_matches_glint() {
                 ctx.apply(operation);
             }
 
-            let output = glint_output(ctx.repo(&case.target_repo), &case.env);
+            let output = glint_output(ctx.repo(&case.target_repo), &case.env, fixture.raw);
             let expected = render_expected(&case.expected_stdout, &ctx);
             assert_eq!(
                 output,
@@ -194,7 +196,7 @@ fn fixture_files() -> Vec<PathBuf> {
     files
 }
 
-fn glint_output(repo: &Path, env_overrides: &BTreeMap<String, String>) -> String {
+fn glint_output(repo: &Path, env_overrides: &BTreeMap<String, String>, raw: bool) -> String {
     let mut cmd = assert_cmd::Command::cargo_bin("glint").unwrap();
     cmd.current_dir(repo);
     cmd.env("ZSH_THEME_GIT_PROMPT_PREFIX", "(");
@@ -214,7 +216,12 @@ fn glint_output(repo: &Path, env_overrides: &BTreeMap<String, String>) -> String
     }
 
     let output = cmd.assert().success().get_output().stdout.clone();
-    normalize_output(String::from_utf8(output).unwrap())
+    let output = String::from_utf8(output).unwrap();
+    if raw {
+        output
+    } else {
+        normalize_output(output)
+    }
 }
 
 fn normalize_output(output: String) -> String {

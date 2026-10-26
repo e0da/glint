@@ -25,15 +25,15 @@ impl Default for PromptTheme {
             prefix: "(".to_owned(),
             suffix: ")".to_owned(),
             separator: "|".to_owned(),
-            branch: "%{$fg_bold[magenta]%}".to_owned(),
-            staged: "%{$fg[red]%}%{●%G%}".to_owned(),
-            conflicts: "%{$fg[red]%}%{✖%G%}".to_owned(),
-            changed: "%{$fg[blue]%}%{✚%G%}".to_owned(),
+            branch: "%{\x1b[01;35m%}".to_owned(),
+            staged: "%{\x1b[31m%}%{●%G%}".to_owned(),
+            conflicts: "%{\x1b[31m%}%{✖%G%}".to_owned(),
+            changed: "%{\x1b[34m%}%{✚%G%}".to_owned(),
             behind: "%{↓%G%}".to_owned(),
             ahead: "%{↑%G%}".to_owned(),
             untracked: "%{…%G%}".to_owned(),
-            clean: "%{$fg_bold[green]%}%{✔%G%}".to_owned(),
-            reset: "%{${reset_color}%}".to_owned(),
+            clean: "%{\x1b[01;32m%}%{✔%G%}".to_owned(),
+            reset: "%{\x1b[00m%}".to_owned(),
         }
     }
 }

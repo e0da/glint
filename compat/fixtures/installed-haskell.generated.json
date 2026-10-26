@@ -1,0 +1,1075 @@
+{
+  "metadata": {
+    "oracle": "installed Haskell binary; build source commit unknown",
+    "sha256": {
+      "zshrc.sh": "8a150a198354c9fd4da15d626b64e526fe42038608b5fb2bf564ac590ca1c6c4",
+      "src/.bin/gitstatus": "a9f9b5f903a05764320c8cad5ec73e7514e3f9ffff530c9793cd89233cad144d"
+    },
+    "shell_source": "olivierverdier/zsh-git-prompt@0a6c8b610e799040b612db8888945f502a2ddd9d (trailing blank lines differ)",
+    "dots_ref": "d80aeff88a534123dc89d4761e9f086b5d6d5c1f",
+    "dots_sha256": {
+      "colors": "e00e2f7aa9641ed7e7a4f8a1d107591f3b6707e9561b5c1e3c4885b482fa1e8a",
+      "prompt": "70021910bb9ec5503ac1f69b22ed2c32676677f4e153358ebb9a7b29f0d6daf0"
+    },
+    "generator": "compat/capture_upstream.py",
+    "git_version": "git version 2.55.0",
+    "zsh_version": "zsh 5.9 (arm64-apple-darwin25.0)"
+  },
+  "raw": true,
+  "cases": [
+    {
+      "name": "plain/clean_branch",
+      "expected_stdout": "(main%{\u001b[00m%}|✔%{\u001b[00m%})",
+      "operations": [
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        }
+      ],
+      "env": {
+        "ZSH_THEME_GIT_PROMPT_AHEAD": "↑",
+        "ZSH_THEME_GIT_PROMPT_BEHIND": "↓",
+        "ZSH_THEME_GIT_PROMPT_BRANCH": "",
+        "ZSH_THEME_GIT_PROMPT_CHANGED": "✚",
+        "ZSH_THEME_GIT_PROMPT_CLEAN": "✔",
+        "ZSH_THEME_GIT_PROMPT_CONFLICTS": "✖",
+        "ZSH_THEME_GIT_PROMPT_PREFIX": "(",
+        "ZSH_THEME_GIT_PROMPT_SEPARATOR": "|",
+        "ZSH_THEME_GIT_PROMPT_STAGED": "●",
+        "ZSH_THEME_GIT_PROMPT_SUFFIX": ")",
+        "ZSH_THEME_GIT_PROMPT_UNTRACKED": "…"
+      }
+    },
+    {
+      "name": "plain/staged_only",
+      "expected_stdout": "(main%{\u001b[00m%}|●1%{\u001b[00m%}%{\u001b[00m%})",
+      "operations": [
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        },
+        {
+          "type": "write_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "updated"
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": [
+            "add",
+            "tracked.txt"
+          ]
+        }
+      ],
+      "env": {
+        "ZSH_THEME_GIT_PROMPT_AHEAD": "↑",
+        "ZSH_THEME_GIT_PROMPT_BEHIND": "↓",
+        "ZSH_THEME_GIT_PROMPT_BRANCH": "",
+        "ZSH_THEME_GIT_PROMPT_CHANGED": "✚",
+        "ZSH_THEME_GIT_PROMPT_CLEAN": "✔",
+        "ZSH_THEME_GIT_PROMPT_CONFLICTS": "✖",
+        "ZSH_THEME_GIT_PROMPT_PREFIX": "(",
+        "ZSH_THEME_GIT_PROMPT_SEPARATOR": "|",
+        "ZSH_THEME_GIT_PROMPT_STAGED": "●",
+        "ZSH_THEME_GIT_PROMPT_SUFFIX": ")",
+        "ZSH_THEME_GIT_PROMPT_UNTRACKED": "…"
+      }
+    },
+    {
+      "name": "plain/changed_only",
+      "expected_stdout": "(main%{\u001b[00m%}|✚1%{\u001b[00m%}%{\u001b[00m%})",
+      "operations": [
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        },
+        {
+          "type": "write_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "updated"
+        }
+      ],
+      "env": {
+        "ZSH_THEME_GIT_PROMPT_AHEAD": "↑",
+        "ZSH_THEME_GIT_PROMPT_BEHIND": "↓",
+        "ZSH_THEME_GIT_PROMPT_BRANCH": "",
+        "ZSH_THEME_GIT_PROMPT_CHANGED": "✚",
+        "ZSH_THEME_GIT_PROMPT_CLEAN": "✔",
+        "ZSH_THEME_GIT_PROMPT_CONFLICTS": "✖",
+        "ZSH_THEME_GIT_PROMPT_PREFIX": "(",
+        "ZSH_THEME_GIT_PROMPT_SEPARATOR": "|",
+        "ZSH_THEME_GIT_PROMPT_STAGED": "●",
+        "ZSH_THEME_GIT_PROMPT_SUFFIX": ")",
+        "ZSH_THEME_GIT_PROMPT_UNTRACKED": "…"
+      }
+    },
+    {
+      "name": "plain/untracked",
+      "expected_stdout": "(main%{\u001b[00m%}|…%{\u001b[00m%}%{\u001b[00m%})",
+      "operations": [
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        },
+        {
+          "type": "write_file",
+          "repo": "repo",
+          "path": "new.txt",
+          "contents": "new"
+        }
+      ],
+      "env": {
+        "ZSH_THEME_GIT_PROMPT_AHEAD": "↑",
+        "ZSH_THEME_GIT_PROMPT_BEHIND": "↓",
+        "ZSH_THEME_GIT_PROMPT_BRANCH": "",
+        "ZSH_THEME_GIT_PROMPT_CHANGED": "✚",
+        "ZSH_THEME_GIT_PROMPT_CLEAN": "✔",
+        "ZSH_THEME_GIT_PROMPT_CONFLICTS": "✖",
+        "ZSH_THEME_GIT_PROMPT_PREFIX": "(",
+        "ZSH_THEME_GIT_PROMPT_SEPARATOR": "|",
+        "ZSH_THEME_GIT_PROMPT_STAGED": "●",
+        "ZSH_THEME_GIT_PROMPT_SUFFIX": ")",
+        "ZSH_THEME_GIT_PROMPT_UNTRACKED": "…"
+      }
+    },
+    {
+      "name": "plain/ahead_only",
+      "expected_stdout": "(main%{\u001b[00m%}↑1%{\u001b[00m%}|✔%{\u001b[00m%})",
+      "operations": [
+        {
+          "type": "bare_remote",
+          "repo": "origin"
+        },
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        },
+        {
+          "type": "add_remote_and_push",
+          "repo": "repo",
+          "remote": "origin"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "local",
+          "message": "Local commit"
+        }
+      ],
+      "env": {
+        "ZSH_THEME_GIT_PROMPT_AHEAD": "↑",
+        "ZSH_THEME_GIT_PROMPT_BEHIND": "↓",
+        "ZSH_THEME_GIT_PROMPT_BRANCH": "",
+        "ZSH_THEME_GIT_PROMPT_CHANGED": "✚",
+        "ZSH_THEME_GIT_PROMPT_CLEAN": "✔",
+        "ZSH_THEME_GIT_PROMPT_CONFLICTS": "✖",
+        "ZSH_THEME_GIT_PROMPT_PREFIX": "(",
+        "ZSH_THEME_GIT_PROMPT_SEPARATOR": "|",
+        "ZSH_THEME_GIT_PROMPT_STAGED": "●",
+        "ZSH_THEME_GIT_PROMPT_SUFFIX": ")",
+        "ZSH_THEME_GIT_PROMPT_UNTRACKED": "…"
+      }
+    },
+    {
+      "name": "plain/behind_only",
+      "expected_stdout": "(main%{\u001b[00m%}↓1%{\u001b[00m%}|✔%{\u001b[00m%})",
+      "operations": [
+        {
+          "type": "bare_remote",
+          "repo": "origin"
+        },
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        },
+        {
+          "type": "add_remote_and_push",
+          "repo": "repo",
+          "remote": "origin"
+        },
+        {
+          "type": "clone_remote",
+          "repo": "peer",
+          "remote": "origin"
+        },
+        {
+          "type": "commit_file",
+          "repo": "peer",
+          "path": "peer.txt",
+          "contents": "peer",
+          "message": "Peer commit"
+        },
+        {
+          "type": "git",
+          "repo": "peer",
+          "args": [
+            "push",
+            "origin",
+            "main"
+          ]
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": [
+            "fetch",
+            "origin"
+          ]
+        }
+      ],
+      "env": {
+        "ZSH_THEME_GIT_PROMPT_AHEAD": "↑",
+        "ZSH_THEME_GIT_PROMPT_BEHIND": "↓",
+        "ZSH_THEME_GIT_PROMPT_BRANCH": "",
+        "ZSH_THEME_GIT_PROMPT_CHANGED": "✚",
+        "ZSH_THEME_GIT_PROMPT_CLEAN": "✔",
+        "ZSH_THEME_GIT_PROMPT_CONFLICTS": "✖",
+        "ZSH_THEME_GIT_PROMPT_PREFIX": "(",
+        "ZSH_THEME_GIT_PROMPT_SEPARATOR": "|",
+        "ZSH_THEME_GIT_PROMPT_STAGED": "●",
+        "ZSH_THEME_GIT_PROMPT_SUFFIX": ")",
+        "ZSH_THEME_GIT_PROMPT_UNTRACKED": "…"
+      }
+    },
+    {
+      "name": "plain/diverged",
+      "expected_stdout": "(main%{\u001b[00m%}↓1%{\u001b[00m%}↑1%{\u001b[00m%}|✔%{\u001b[00m%})",
+      "operations": [
+        {
+          "type": "bare_remote",
+          "repo": "origin"
+        },
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        },
+        {
+          "type": "add_remote_and_push",
+          "repo": "repo",
+          "remote": "origin"
+        },
+        {
+          "type": "clone_remote",
+          "repo": "peer",
+          "remote": "origin"
+        },
+        {
+          "type": "commit_file",
+          "repo": "peer",
+          "path": "peer.txt",
+          "contents": "peer",
+          "message": "Peer commit"
+        },
+        {
+          "type": "git",
+          "repo": "peer",
+          "args": [
+            "push",
+            "origin",
+            "main"
+          ]
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "local.txt",
+          "contents": "local",
+          "message": "Local commit"
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": [
+            "fetch",
+            "origin"
+          ]
+        }
+      ],
+      "env": {
+        "ZSH_THEME_GIT_PROMPT_AHEAD": "↑",
+        "ZSH_THEME_GIT_PROMPT_BEHIND": "↓",
+        "ZSH_THEME_GIT_PROMPT_BRANCH": "",
+        "ZSH_THEME_GIT_PROMPT_CHANGED": "✚",
+        "ZSH_THEME_GIT_PROMPT_CLEAN": "✔",
+        "ZSH_THEME_GIT_PROMPT_CONFLICTS": "✖",
+        "ZSH_THEME_GIT_PROMPT_PREFIX": "(",
+        "ZSH_THEME_GIT_PROMPT_SEPARATOR": "|",
+        "ZSH_THEME_GIT_PROMPT_STAGED": "●",
+        "ZSH_THEME_GIT_PROMPT_SUFFIX": ")",
+        "ZSH_THEME_GIT_PROMPT_UNTRACKED": "…"
+      }
+    },
+    {
+      "name": "plain/conflicts_and_changed",
+      "expected_stdout": "(main%{\u001b[00m%}|✖1%{\u001b[00m%}✚1%{\u001b[00m%}%{\u001b[00m%})",
+      "operations": [
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": [
+            "checkout",
+            "-b",
+            "feature"
+          ]
+        },
+        {
+          "type": "write_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "feature"
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": [
+            "add",
+            "tracked.txt"
+          ]
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": [
+            "commit",
+            "-m",
+            "Feature change"
+          ]
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": [
+            "checkout",
+            "main"
+          ]
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "other.txt",
+          "contents": "base",
+          "message": "Add second file"
+        },
+        {
+          "type": "write_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "main"
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": [
+            "add",
+            "tracked.txt"
+          ]
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": [
+            "commit",
+            "-m",
+            "Main change"
+          ]
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": [
+            "merge",
+            "feature"
+          ],
+          "expect_success": false
+        },
+        {
+          "type": "write_file",
+          "repo": "repo",
+          "path": "other.txt",
+          "contents": "changed"
+        }
+      ],
+      "env": {
+        "ZSH_THEME_GIT_PROMPT_AHEAD": "↑",
+        "ZSH_THEME_GIT_PROMPT_BEHIND": "↓",
+        "ZSH_THEME_GIT_PROMPT_BRANCH": "",
+        "ZSH_THEME_GIT_PROMPT_CHANGED": "✚",
+        "ZSH_THEME_GIT_PROMPT_CLEAN": "✔",
+        "ZSH_THEME_GIT_PROMPT_CONFLICTS": "✖",
+        "ZSH_THEME_GIT_PROMPT_PREFIX": "(",
+        "ZSH_THEME_GIT_PROMPT_SEPARATOR": "|",
+        "ZSH_THEME_GIT_PROMPT_STAGED": "●",
+        "ZSH_THEME_GIT_PROMPT_SUFFIX": ")",
+        "ZSH_THEME_GIT_PROMPT_UNTRACKED": "…"
+      }
+    },
+    {
+      "name": "plain/detached_head_abbrev",
+      "expected_stdout": "(:{{git_short_head:repo}}%{\u001b[00m%}|✔%{\u001b[00m%})",
+      "operations": [
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": [
+            "config",
+            "core.abbrev",
+            "12"
+          ]
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": [
+            "checkout",
+            "--detach"
+          ]
+        }
+      ],
+      "env": {
+        "ZSH_THEME_GIT_PROMPT_AHEAD": "↑",
+        "ZSH_THEME_GIT_PROMPT_BEHIND": "↓",
+        "ZSH_THEME_GIT_PROMPT_BRANCH": "",
+        "ZSH_THEME_GIT_PROMPT_CHANGED": "✚",
+        "ZSH_THEME_GIT_PROMPT_CLEAN": "✔",
+        "ZSH_THEME_GIT_PROMPT_CONFLICTS": "✖",
+        "ZSH_THEME_GIT_PROMPT_PREFIX": "(",
+        "ZSH_THEME_GIT_PROMPT_SEPARATOR": "|",
+        "ZSH_THEME_GIT_PROMPT_STAGED": "●",
+        "ZSH_THEME_GIT_PROMPT_SUFFIX": ")",
+        "ZSH_THEME_GIT_PROMPT_UNTRACKED": "…"
+      }
+    },
+    {
+      "name": "plain/theme_overrides",
+      "expected_stdout": "[BR:main%{\u001b[00m%} :: OK%{\u001b[00m%}]",
+      "env": {
+        "ZSH_THEME_GIT_PROMPT_AHEAD": "↑",
+        "ZSH_THEME_GIT_PROMPT_BEHIND": "↓",
+        "ZSH_THEME_GIT_PROMPT_BRANCH": "BR:",
+        "ZSH_THEME_GIT_PROMPT_CHANGED": "✚",
+        "ZSH_THEME_GIT_PROMPT_CLEAN": "OK",
+        "ZSH_THEME_GIT_PROMPT_CONFLICTS": "✖",
+        "ZSH_THEME_GIT_PROMPT_PREFIX": "[",
+        "ZSH_THEME_GIT_PROMPT_SEPARATOR": " :: ",
+        "ZSH_THEME_GIT_PROMPT_STAGED": "●",
+        "ZSH_THEME_GIT_PROMPT_SUFFIX": "]",
+        "ZSH_THEME_GIT_PROMPT_UNTRACKED": "…"
+      },
+      "operations": [
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        }
+      ]
+    },
+    {
+      "name": "justin/clean_branch",
+      "expected_stdout": "%b%F{208}main%{\u001b[00m%}%b%F{234}·%f%{\u001b[01;32m%}%{✔%G%}%{\u001b[00m%}",
+      "operations": [
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        }
+      ],
+      "env": {
+        "ZSH_THEME_GIT_PROMPT_AHEAD": "%{↑%G%}",
+        "ZSH_THEME_GIT_PROMPT_BEHIND": "%{↓%G%}",
+        "ZSH_THEME_GIT_PROMPT_BRANCH": "%b%F{208}",
+        "ZSH_THEME_GIT_PROMPT_CHANGED": "%{\u001b[34m%}%{✚%G%}",
+        "ZSH_THEME_GIT_PROMPT_CLEAN": "%{\u001b[01;32m%}%{✔%G%}",
+        "ZSH_THEME_GIT_PROMPT_CONFLICTS": "%{\u001b[31m%}%{✖%G%}",
+        "ZSH_THEME_GIT_PROMPT_PREFIX": "",
+        "ZSH_THEME_GIT_PROMPT_SEPARATOR": "%b%F{234}·%f",
+        "ZSH_THEME_GIT_PROMPT_STAGED": "%{\u001b[31m%}%{●%G%}",
+        "ZSH_THEME_GIT_PROMPT_SUFFIX": "",
+        "ZSH_THEME_GIT_PROMPT_UNTRACKED": "%{…%G%}"
+      }
+    },
+    {
+      "name": "justin/staged_only",
+      "expected_stdout": "%b%F{208}main%{\u001b[00m%}%b%F{234}·%f%{\u001b[31m%}%{●%G%}1%{\u001b[00m%}%{\u001b[00m%}",
+      "operations": [
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        },
+        {
+          "type": "write_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "updated"
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": [
+            "add",
+            "tracked.txt"
+          ]
+        }
+      ],
+      "env": {
+        "ZSH_THEME_GIT_PROMPT_AHEAD": "%{↑%G%}",
+        "ZSH_THEME_GIT_PROMPT_BEHIND": "%{↓%G%}",
+        "ZSH_THEME_GIT_PROMPT_BRANCH": "%b%F{208}",
+        "ZSH_THEME_GIT_PROMPT_CHANGED": "%{\u001b[34m%}%{✚%G%}",
+        "ZSH_THEME_GIT_PROMPT_CLEAN": "%{\u001b[01;32m%}%{✔%G%}",
+        "ZSH_THEME_GIT_PROMPT_CONFLICTS": "%{\u001b[31m%}%{✖%G%}",
+        "ZSH_THEME_GIT_PROMPT_PREFIX": "",
+        "ZSH_THEME_GIT_PROMPT_SEPARATOR": "%b%F{234}·%f",
+        "ZSH_THEME_GIT_PROMPT_STAGED": "%{\u001b[31m%}%{●%G%}",
+        "ZSH_THEME_GIT_PROMPT_SUFFIX": "",
+        "ZSH_THEME_GIT_PROMPT_UNTRACKED": "%{…%G%}"
+      }
+    },
+    {
+      "name": "justin/changed_only",
+      "expected_stdout": "%b%F{208}main%{\u001b[00m%}%b%F{234}·%f%{\u001b[34m%}%{✚%G%}1%{\u001b[00m%}%{\u001b[00m%}",
+      "operations": [
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        },
+        {
+          "type": "write_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "updated"
+        }
+      ],
+      "env": {
+        "ZSH_THEME_GIT_PROMPT_AHEAD": "%{↑%G%}",
+        "ZSH_THEME_GIT_PROMPT_BEHIND": "%{↓%G%}",
+        "ZSH_THEME_GIT_PROMPT_BRANCH": "%b%F{208}",
+        "ZSH_THEME_GIT_PROMPT_CHANGED": "%{\u001b[34m%}%{✚%G%}",
+        "ZSH_THEME_GIT_PROMPT_CLEAN": "%{\u001b[01;32m%}%{✔%G%}",
+        "ZSH_THEME_GIT_PROMPT_CONFLICTS": "%{\u001b[31m%}%{✖%G%}",
+        "ZSH_THEME_GIT_PROMPT_PREFIX": "",
+        "ZSH_THEME_GIT_PROMPT_SEPARATOR": "%b%F{234}·%f",
+        "ZSH_THEME_GIT_PROMPT_STAGED": "%{\u001b[31m%}%{●%G%}",
+        "ZSH_THEME_GIT_PROMPT_SUFFIX": "",
+        "ZSH_THEME_GIT_PROMPT_UNTRACKED": "%{…%G%}"
+      }
+    },
+    {
+      "name": "justin/untracked",
+      "expected_stdout": "%b%F{208}main%{\u001b[00m%}%b%F{234}·%f%{…%G%}%{\u001b[00m%}%{\u001b[00m%}",
+      "operations": [
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        },
+        {
+          "type": "write_file",
+          "repo": "repo",
+          "path": "new.txt",
+          "contents": "new"
+        }
+      ],
+      "env": {
+        "ZSH_THEME_GIT_PROMPT_AHEAD": "%{↑%G%}",
+        "ZSH_THEME_GIT_PROMPT_BEHIND": "%{↓%G%}",
+        "ZSH_THEME_GIT_PROMPT_BRANCH": "%b%F{208}",
+        "ZSH_THEME_GIT_PROMPT_CHANGED": "%{\u001b[34m%}%{✚%G%}",
+        "ZSH_THEME_GIT_PROMPT_CLEAN": "%{\u001b[01;32m%}%{✔%G%}",
+        "ZSH_THEME_GIT_PROMPT_CONFLICTS": "%{\u001b[31m%}%{✖%G%}",
+        "ZSH_THEME_GIT_PROMPT_PREFIX": "",
+        "ZSH_THEME_GIT_PROMPT_SEPARATOR": "%b%F{234}·%f",
+        "ZSH_THEME_GIT_PROMPT_STAGED": "%{\u001b[31m%}%{●%G%}",
+        "ZSH_THEME_GIT_PROMPT_SUFFIX": "",
+        "ZSH_THEME_GIT_PROMPT_UNTRACKED": "%{…%G%}"
+      }
+    },
+    {
+      "name": "justin/ahead_only",
+      "expected_stdout": "%b%F{208}main%{\u001b[00m%}%{↑%G%}1%{\u001b[00m%}%b%F{234}·%f%{\u001b[01;32m%}%{✔%G%}%{\u001b[00m%}",
+      "operations": [
+        {
+          "type": "bare_remote",
+          "repo": "origin"
+        },
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        },
+        {
+          "type": "add_remote_and_push",
+          "repo": "repo",
+          "remote": "origin"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "local",
+          "message": "Local commit"
+        }
+      ],
+      "env": {
+        "ZSH_THEME_GIT_PROMPT_AHEAD": "%{↑%G%}",
+        "ZSH_THEME_GIT_PROMPT_BEHIND": "%{↓%G%}",
+        "ZSH_THEME_GIT_PROMPT_BRANCH": "%b%F{208}",
+        "ZSH_THEME_GIT_PROMPT_CHANGED": "%{\u001b[34m%}%{✚%G%}",
+        "ZSH_THEME_GIT_PROMPT_CLEAN": "%{\u001b[01;32m%}%{✔%G%}",
+        "ZSH_THEME_GIT_PROMPT_CONFLICTS": "%{\u001b[31m%}%{✖%G%}",
+        "ZSH_THEME_GIT_PROMPT_PREFIX": "",
+        "ZSH_THEME_GIT_PROMPT_SEPARATOR": "%b%F{234}·%f",
+        "ZSH_THEME_GIT_PROMPT_STAGED": "%{\u001b[31m%}%{●%G%}",
+        "ZSH_THEME_GIT_PROMPT_SUFFIX": "",
+        "ZSH_THEME_GIT_PROMPT_UNTRACKED": "%{…%G%}"
+      }
+    },
+    {
+      "name": "justin/behind_only",
+      "expected_stdout": "%b%F{208}main%{\u001b[00m%}%{↓%G%}1%{\u001b[00m%}%b%F{234}·%f%{\u001b[01;32m%}%{✔%G%}%{\u001b[00m%}",
+      "operations": [
+        {
+          "type": "bare_remote",
+          "repo": "origin"
+        },
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        },
+        {
+          "type": "add_remote_and_push",
+          "repo": "repo",
+          "remote": "origin"
+        },
+        {
+          "type": "clone_remote",
+          "repo": "peer",
+          "remote": "origin"
+        },
+        {
+          "type": "commit_file",
+          "repo": "peer",
+          "path": "peer.txt",
+          "contents": "peer",
+          "message": "Peer commit"
+        },
+        {
+          "type": "git",
+          "repo": "peer",
+          "args": [
+            "push",
+            "origin",
+            "main"
+          ]
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": [
+            "fetch",
+            "origin"
+          ]
+        }
+      ],
+      "env": {
+        "ZSH_THEME_GIT_PROMPT_AHEAD": "%{↑%G%}",
+        "ZSH_THEME_GIT_PROMPT_BEHIND": "%{↓%G%}",
+        "ZSH_THEME_GIT_PROMPT_BRANCH": "%b%F{208}",
+        "ZSH_THEME_GIT_PROMPT_CHANGED": "%{\u001b[34m%}%{✚%G%}",
+        "ZSH_THEME_GIT_PROMPT_CLEAN": "%{\u001b[01;32m%}%{✔%G%}",
+        "ZSH_THEME_GIT_PROMPT_CONFLICTS": "%{\u001b[31m%}%{✖%G%}",
+        "ZSH_THEME_GIT_PROMPT_PREFIX": "",
+        "ZSH_THEME_GIT_PROMPT_SEPARATOR": "%b%F{234}·%f",
+        "ZSH_THEME_GIT_PROMPT_STAGED": "%{\u001b[31m%}%{●%G%}",
+        "ZSH_THEME_GIT_PROMPT_SUFFIX": "",
+        "ZSH_THEME_GIT_PROMPT_UNTRACKED": "%{…%G%}"
+      }
+    },
+    {
+      "name": "justin/diverged",
+      "expected_stdout": "%b%F{208}main%{\u001b[00m%}%{↓%G%}1%{\u001b[00m%}%{↑%G%}1%{\u001b[00m%}%b%F{234}·%f%{\u001b[01;32m%}%{✔%G%}%{\u001b[00m%}",
+      "operations": [
+        {
+          "type": "bare_remote",
+          "repo": "origin"
+        },
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        },
+        {
+          "type": "add_remote_and_push",
+          "repo": "repo",
+          "remote": "origin"
+        },
+        {
+          "type": "clone_remote",
+          "repo": "peer",
+          "remote": "origin"
+        },
+        {
+          "type": "commit_file",
+          "repo": "peer",
+          "path": "peer.txt",
+          "contents": "peer",
+          "message": "Peer commit"
+        },
+        {
+          "type": "git",
+          "repo": "peer",
+          "args": [
+            "push",
+            "origin",
+            "main"
+          ]
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "local.txt",
+          "contents": "local",
+          "message": "Local commit"
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": [
+            "fetch",
+            "origin"
+          ]
+        }
+      ],
+      "env": {
+        "ZSH_THEME_GIT_PROMPT_AHEAD": "%{↑%G%}",
+        "ZSH_THEME_GIT_PROMPT_BEHIND": "%{↓%G%}",
+        "ZSH_THEME_GIT_PROMPT_BRANCH": "%b%F{208}",
+        "ZSH_THEME_GIT_PROMPT_CHANGED": "%{\u001b[34m%}%{✚%G%}",
+        "ZSH_THEME_GIT_PROMPT_CLEAN": "%{\u001b[01;32m%}%{✔%G%}",
+        "ZSH_THEME_GIT_PROMPT_CONFLICTS": "%{\u001b[31m%}%{✖%G%}",
+        "ZSH_THEME_GIT_PROMPT_PREFIX": "",
+        "ZSH_THEME_GIT_PROMPT_SEPARATOR": "%b%F{234}·%f",
+        "ZSH_THEME_GIT_PROMPT_STAGED": "%{\u001b[31m%}%{●%G%}",
+        "ZSH_THEME_GIT_PROMPT_SUFFIX": "",
+        "ZSH_THEME_GIT_PROMPT_UNTRACKED": "%{…%G%}"
+      }
+    },
+    {
+      "name": "justin/conflicts_and_changed",
+      "expected_stdout": "%b%F{208}main%{\u001b[00m%}%b%F{234}·%f%{\u001b[31m%}%{✖%G%}1%{\u001b[00m%}%{\u001b[34m%}%{✚%G%}1%{\u001b[00m%}%{\u001b[00m%}",
+      "operations": [
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": [
+            "checkout",
+            "-b",
+            "feature"
+          ]
+        },
+        {
+          "type": "write_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "feature"
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": [
+            "add",
+            "tracked.txt"
+          ]
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": [
+            "commit",
+            "-m",
+            "Feature change"
+          ]
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": [
+            "checkout",
+            "main"
+          ]
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "other.txt",
+          "contents": "base",
+          "message": "Add second file"
+        },
+        {
+          "type": "write_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "main"
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": [
+            "add",
+            "tracked.txt"
+          ]
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": [
+            "commit",
+            "-m",
+            "Main change"
+          ]
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": [
+            "merge",
+            "feature"
+          ],
+          "expect_success": false
+        },
+        {
+          "type": "write_file",
+          "repo": "repo",
+          "path": "other.txt",
+          "contents": "changed"
+        }
+      ],
+      "env": {
+        "ZSH_THEME_GIT_PROMPT_AHEAD": "%{↑%G%}",
+        "ZSH_THEME_GIT_PROMPT_BEHIND": "%{↓%G%}",
+        "ZSH_THEME_GIT_PROMPT_BRANCH": "%b%F{208}",
+        "ZSH_THEME_GIT_PROMPT_CHANGED": "%{\u001b[34m%}%{✚%G%}",
+        "ZSH_THEME_GIT_PROMPT_CLEAN": "%{\u001b[01;32m%}%{✔%G%}",
+        "ZSH_THEME_GIT_PROMPT_CONFLICTS": "%{\u001b[31m%}%{✖%G%}",
+        "ZSH_THEME_GIT_PROMPT_PREFIX": "",
+        "ZSH_THEME_GIT_PROMPT_SEPARATOR": "%b%F{234}·%f",
+        "ZSH_THEME_GIT_PROMPT_STAGED": "%{\u001b[31m%}%{●%G%}",
+        "ZSH_THEME_GIT_PROMPT_SUFFIX": "",
+        "ZSH_THEME_GIT_PROMPT_UNTRACKED": "%{…%G%}"
+      }
+    },
+    {
+      "name": "justin/detached_head_abbrev",
+      "expected_stdout": "%b%F{208}:{{git_short_head:repo}}%{\u001b[00m%}%b%F{234}·%f%{\u001b[01;32m%}%{✔%G%}%{\u001b[00m%}",
+      "operations": [
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": [
+            "config",
+            "core.abbrev",
+            "12"
+          ]
+        },
+        {
+          "type": "git",
+          "repo": "repo",
+          "args": [
+            "checkout",
+            "--detach"
+          ]
+        }
+      ],
+      "env": {
+        "ZSH_THEME_GIT_PROMPT_AHEAD": "%{↑%G%}",
+        "ZSH_THEME_GIT_PROMPT_BEHIND": "%{↓%G%}",
+        "ZSH_THEME_GIT_PROMPT_BRANCH": "%b%F{208}",
+        "ZSH_THEME_GIT_PROMPT_CHANGED": "%{\u001b[34m%}%{✚%G%}",
+        "ZSH_THEME_GIT_PROMPT_CLEAN": "%{\u001b[01;32m%}%{✔%G%}",
+        "ZSH_THEME_GIT_PROMPT_CONFLICTS": "%{\u001b[31m%}%{✖%G%}",
+        "ZSH_THEME_GIT_PROMPT_PREFIX": "",
+        "ZSH_THEME_GIT_PROMPT_SEPARATOR": "%b%F{234}·%f",
+        "ZSH_THEME_GIT_PROMPT_STAGED": "%{\u001b[31m%}%{●%G%}",
+        "ZSH_THEME_GIT_PROMPT_SUFFIX": "",
+        "ZSH_THEME_GIT_PROMPT_UNTRACKED": "%{…%G%}"
+      }
+    },
+    {
+      "name": "justin/theme_overrides",
+      "expected_stdout": "[BR:main%{\u001b[00m%} :: OK%{\u001b[00m%}]",
+      "env": {
+        "ZSH_THEME_GIT_PROMPT_AHEAD": "%{↑%G%}",
+        "ZSH_THEME_GIT_PROMPT_BEHIND": "%{↓%G%}",
+        "ZSH_THEME_GIT_PROMPT_BRANCH": "BR:",
+        "ZSH_THEME_GIT_PROMPT_CHANGED": "%{\u001b[34m%}%{✚%G%}",
+        "ZSH_THEME_GIT_PROMPT_CLEAN": "OK",
+        "ZSH_THEME_GIT_PROMPT_CONFLICTS": "%{\u001b[31m%}%{✖%G%}",
+        "ZSH_THEME_GIT_PROMPT_PREFIX": "[",
+        "ZSH_THEME_GIT_PROMPT_SEPARATOR": " :: ",
+        "ZSH_THEME_GIT_PROMPT_STAGED": "%{\u001b[31m%}%{●%G%}",
+        "ZSH_THEME_GIT_PROMPT_SUFFIX": "]",
+        "ZSH_THEME_GIT_PROMPT_UNTRACKED": "%{…%G%}"
+      },
+      "operations": [
+        {
+          "type": "init_repo",
+          "repo": "repo"
+        },
+        {
+          "type": "commit_file",
+          "repo": "repo",
+          "path": "tracked.txt",
+          "contents": "hello",
+          "message": "Initial commit"
+        }
+      ]
+    }
+  ]
+}

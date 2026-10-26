@@ -5,7 +5,7 @@ use std::process::Command;
 
 use tempfile::TempDir;
 
-const RESET: &str = "%{${reset_color}%}";
+const RESET: &str = "%{\x1b[00m%}";
 
 #[test]
 fn outside_git_repo_emits_nothing() {
