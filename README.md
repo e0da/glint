@@ -71,8 +71,12 @@ The first alpha is targeting common-path compatibility with
 `zsh-git-prompt`'s `git_super_status`.
 
 The compatibility contract is defined in [docs/spec/git-super-status.md](docs/spec/git-super-status.md).
-Current automated coverage is centered on that common-path contract rather than
-broader upstream parity.
+Current automated coverage includes twenty raw captures from the digest-pinned
+installed Haskell backend, with plain and pinned Dots themes. The capture harness
+also compares actual Zsh rendering and the Dots `e0da_prompt` function. See
+[compat/README.md](compat/README.md) for provenance, refresh commands, CI admission
+and qualification limits. Installed prompt replacement and tagged releases remain
+separate gates.
 
 ---
 

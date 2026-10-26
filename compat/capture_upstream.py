@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
+import argparse
+import hashlib
 import json
+import math
+import statistics
+import time
 import os
 import shutil
 import subprocess
@@ -8,11 +13,22 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-UPSTREAM_REPO = os.environ["UPSTREAM_REPO"]
-UPSTREAM_REF = os.environ["UPSTREAM_REF"]
-UPSTREAM_SCRIPT = os.environ["UPSTREAM_SCRIPT"]
-REPO_ROOT = Path("/work")
-FIXTURE_PATH = REPO_ROOT / "compat" / "fixtures" / "zsh-git-prompt-common-path.generated.json"
+REPO_ROOT = Path(__file__).resolve().parents[1]
+FIXTURE_PATH = REPO_ROOT / "compat/fixtures/installed-haskell.generated.json"
+PINS = {
+    "zshrc.sh": "8a150a198354c9fd4da15d626b64e526fe42038608b5fb2bf564ac590ca1c6c4",
+    "src/.bin/gitstatus": "a9f9b5f903a05764320c8cad5ec73e7514e3f9ffff530c9793cd89233cad144d",
+}
+DOTS_PINS = {
+    "colors": "e00e2f7aa9641ed7e7a4f8a1d107591f3b6707e9561b5c1e3c4885b482fa1e8a",
+    "prompt": "70021910bb9ec5503ac1f69b22ed2c32676677f4e153358ebb9a7b29f0d6daf0",
+}
+PROFILE = "plain"
+COLORS = ""
+PROMPT = ""
+CANDIDATE = None
+SAMPLES = 0
+MEASUREMENTS = []
 
 THEME = {
     "ZSH_THEME_GIT_PROMPT_PREFIX": "(",
@@ -89,25 +105,58 @@ def clone_remote(remote: Path, repo: Path):
     git(repo, "config", "user.email", "glint-compat@example.com")
 
 
-def upstream_output(repo: Path, upstream_root: Path, env_overrides=None) -> str:
-    script_path = upstream_root / UPSTREAM_SCRIPT
-    if not script_path.exists():
-        raise RuntimeError(
-            f"upstream prompt script not found at {script_path}. "
-            "Set UPSTREAM_SCRIPT to the script that defines git_super_status."
-        )
+def require_prompt(output):
+    if not output.strip():
+        raise RuntimeError("empty inside-Git oracle output")
+    return output
 
-    env = os.environ.copy()
-    env.update(THEME)
-    if env_overrides:
-        env.update(env_overrides)
-    cmd = [
-        "zsh",
-        "-lc",
-        f"source {script_path} >/dev/null 2>&1 && git_super_status",
-    ]
-    result = run(cmd, cwd=repo, env=env)
-    return result.stdout.rstrip("\n")
+
+def verify_digest(path, expected):
+    actual = hashlib.sha256(path.read_bytes()).hexdigest()
+    if actual != expected:
+        raise RuntimeError(f"oracle digest mismatch: {path}: {actual}")
+
+
+def shell_output(repo, root, mode, candidate="oracle", overrides=None):
+    # Keep Git configuration, startup files and inherited theme/cache variables out.
+    env = {key: os.environ[key] for key in ("PATH", "HOME", "TMPDIR") if key in os.environ}
+    env.update(TERM="xterm-256color", LC_ALL="C.UTF-8", GIT_CONFIG_GLOBAL=os.devnull,
+               GIT_CONFIG_NOSYSTEM="1")
+    theme = dict(THEME) if PROFILE == "plain" else {}
+    theme.update(overrides or {})
+    env.update({"ORACLE_" + key: value for key, value in theme.items()})
+    return run(["zsh", "-df", str(REPO_ROOT / "compat/oracle.zsh"), str(root),
+                PROFILE, mode, str(candidate), str(COLORS), str(PROMPT)], cwd=repo, env=env).stdout
+
+
+def effective_theme(repo, root, overrides=None):
+    fields = shell_output(repo, root, "theme", overrides=overrides).split("\0")
+    if fields[-1] == "":
+        fields.pop()
+    return dict(zip(fields[::2], fields[1::2], strict=True))
+
+
+def upstream_output(repo: Path, upstream_root: Path, env_overrides=None) -> str:
+    output = require_prompt(shell_output(repo, upstream_root, "raw", overrides=env_overrides))
+    if CANDIDATE:
+        modes = ["raw", "rendered"] + (["dots"] if PROFILE == "justin" else [])
+        for mode in modes:
+            expected = shell_output(repo, upstream_root, mode, overrides=env_overrides)
+            actual = shell_output(repo, upstream_root, mode, CANDIDATE, env_overrides)
+            if actual != expected:
+                raise RuntimeError(f"{PROFILE}/{repo.parent.name}/{mode} mismatch\n"
+                                   f"oracle={expected!r}\nglint ={actual!r}")
+        mode = "dots" if PROFILE == "justin" else "rendered"
+        timings = {"oracle": [], "glint": []}
+        for _ in range(SAMPLES):
+            for name, binary in (("oracle", "oracle"), ("glint", CANDIDATE)):
+                started = time.perf_counter_ns()
+                shell_output(repo, upstream_root, mode, binary, env_overrides)
+                timings[name].append((time.perf_counter_ns() - started) / 1_000_000)
+        if SAMPLES:
+            MEASUREMENTS.append({"profile": PROFILE, "case": repo.parent.name,
+                                 "mode": mode, "samples_ms": timings})
+    return output
 
 
 def git_output(repo: Path, *args: str) -> str:
@@ -509,22 +558,66 @@ def build_cases(upstream_root: Path):
 
 
 def main():
-    upstream_root = Path(tempfile.mkdtemp(prefix="zsh-git-prompt-"))
-    run(["git", "clone", UPSTREAM_REPO, str(upstream_root)])
-    run(["git", "checkout", UPSTREAM_REF], cwd=upstream_root)
-
+    global PROFILE, COLORS, PROMPT, CANDIDATE, SAMPLES
+    parser = argparse.ArgumentParser(description="Capture the digest-pinned installed Haskell oracle")
+    parser.add_argument("--oracle-root", type=Path, required=True)
+    parser.add_argument("--dots-colors", type=Path, required=True)
+    parser.add_argument("--dots-prompt", type=Path, required=True)
+    parser.add_argument("--candidate", type=Path)
+    parser.add_argument("--samples", type=int, default=0)
+    parser.add_argument("--output", type=Path, default=FIXTURE_PATH)
+    parser.add_argument("--timings", type=Path)
+    args = parser.parse_args()
+    if args.samples < 0 or (args.samples and (not args.candidate or not args.timings)):
+        parser.error("samples require candidate and timings, and must be nonnegative")
+    for relative, digest in PINS.items():
+        verify_digest(args.oracle_root / relative, digest)
+    verify_digest(args.dots_colors, DOTS_PINS["colors"])
+    verify_digest(args.dots_prompt, DOTS_PINS["prompt"])
+    COLORS, PROMPT = args.dots_colors.resolve(), args.dots_prompt.resolve()
+    CANDIDATE = args.candidate.resolve() if args.candidate else None
+    SAMPLES = args.samples
+    cases = []
+    for PROFILE in ("plain", "justin"):
+        captured = build_cases(args.oracle_root)
+        for case in captured:
+            case["env"] = effective_theme(REPO_ROOT, args.oracle_root, case.get("env"))
+            case["name"] = PROFILE + "/" + case["name"]
+            cases.append(case)
     fixture = {
         "metadata": {
-            "source": "zsh-git-prompt",
-            "upstream_repo": UPSTREAM_REPO,
-            "upstream_ref": UPSTREAM_REF,
-            "upstream_script": UPSTREAM_SCRIPT,
+            "oracle": "installed Haskell binary; build source commit unknown",
+            "sha256": PINS,
+            "shell_source": "olivierverdier/zsh-git-prompt@0a6c8b610e799040b612db8888945f502a2ddd9d (trailing blank lines differ)",
+            "dots_ref": "d80aeff88a534123dc89d4761e9f086b5d6d5c1f",
+            "dots_sha256": DOTS_PINS,
             "generator": "compat/capture_upstream.py",
+            "git_version": run(["git", "--version"]).stdout.strip(),
+            "zsh_version": run(["zsh", "--version"]).stdout.strip(),
         },
-        "cases": build_cases(upstream_root),
+        "raw": True,
+        "cases": cases,
     }
+    # No partial or empty result may replace an accepted capture.
+    for case in cases:
+        require_prompt(case["expected_stdout"])
+    write_json(args.output, fixture)
+    if args.timings:
+        summaries = []
+        for measurement in MEASUREMENTS:
+            summary = {key: value for key, value in measurement.items() if key != "samples_ms"}
+            for name, samples in measurement["samples_ms"].items():
+                summary[name] = {"median_ms": statistics.median(samples),
+                                 "p95_ms": sorted(samples)[math.ceil(len(samples) * .95) - 1]}
+            summaries.append(summary)
+        write_json(args.timings, {"measurements": MEASUREMENTS, "summary": summaries})
+    print(f"Captured {len(cases)} nonempty pinned Haskell cases into {args.output}")
 
-    FIXTURE_PATH.write_text(json.dumps(fixture, indent=2) + "\n")
+
+def write_json(path, value):
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(json.dumps(value, indent=2, ensure_ascii=False) + "\n")
+    temporary.replace(path)
 
 
 if __name__ == "__main__":
