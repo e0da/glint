@@ -243,6 +243,69 @@ fn conflicts_and_changed_render_expected_output() {
     assert_output(repo.path(), "(main|✖1✚1)");
 }
 
+#[test]
+fn version_is_independent_of_git_and_working_directory() {
+    let outside = repo();
+    let inside = repo();
+    init_repo(inside.path());
+    commit_file(inside.path(), "tracked.txt", "base", "Initial commit");
+    let fake = fake_git("#!/bin/sh\nprintf invoked > \"$GLINT_TEST_GIT_CALLED\"\nexit 99\n");
+    let marker = outside.path().join("git-called");
+    for cwd in [outside.path(), inside.path()] {
+        for flag in ["--version", "-V"] {
+            glint(cwd)
+                .arg(flag)
+                .env("PATH", fake.path())
+                .env("GLINT_TEST_GIT_CALLED", &marker)
+                .assert()
+                .success()
+                .stdout(format!("glint {}\n", env!("CARGO_PKG_VERSION")))
+                .stderr("");
+            assert!(!marker.exists(), "explicit flags must not invoke Git");
+        }
+    }
+}
+
+#[test]
+fn help_does_not_require_git() {
+    let outside = repo();
+    let fake = fake_git("#!/bin/sh\nprintf invoked > \"$GLINT_TEST_GIT_CALLED\"\nexit 99\n");
+    let marker = outside.path().join("git-called");
+    for flag in ["--help", "-h"] {
+        glint(outside.path())
+            .arg(flag)
+            .env("PATH", fake.path())
+            .env("GLINT_TEST_GIT_CALLED", &marker)
+            .assert()
+            .success()
+            .stdout("Usage: glint [--version | --help]\n\nWith no arguments, print the Git prompt segment.\n")
+            .stderr("");
+        assert!(!marker.exists(), "explicit flags must not invoke Git");
+    }
+}
+
+#[test]
+fn unsupported_or_surplus_arguments_fail_without_git() {
+    let outside = repo();
+    let fake = fake_git("#!/bin/sh\nprintf invoked > \"$GLINT_TEST_GIT_CALLED\"\nexit 99\n");
+    let marker = outside.path().join("git-called");
+    for args in [
+        vec!["--unknown"],
+        vec!["--version", "extra"],
+        vec!["--help", "extra"],
+    ] {
+        glint(outside.path())
+            .args(args)
+            .env("PATH", fake.path())
+            .env("GLINT_TEST_GIT_CALLED", &marker)
+            .assert()
+            .code(2)
+            .stdout("")
+            .stderr("Usage: glint [--version | --help]\n");
+        assert!(!marker.exists(), "invalid arguments must not invoke Git");
+    }
+}
+
 fn assert_output(repo: &Path, expected_plain: &str) {
     let output = glint(repo).assert().success().get_output().stdout.clone();
     let stdout = normalize_output(String::from_utf8(output).unwrap());

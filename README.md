@@ -50,6 +50,11 @@ Releases once the first alpha is tagged.
 
 ## Usage
 
+`glint --version` (or `-V`) prints the Cargo package name and version without
+Git access. `glint --help` (or `-h`) prints usage. Unsupported or surplus arguments
+exit with status 2 and usage on stderr. With no arguments, prompt-safe behavior
+is unchanged.
+
 Current portable usage is direct command substitution:
 
 ```zsh
